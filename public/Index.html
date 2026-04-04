@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Dubee.ai — AI Video Dubbing</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:#07071a;color:#fff;min-height:100vh}
+.orb1{position:fixed;top:-100px;left:-100px;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(124,58,237,.3),transparent 70%);pointer-events:none}
+.orb2{position:fixed;bottom:-100px;right:-100px;width:350px;height:350px;border-radius:50%;background:radial-gradient(circle,rgba(79,70,229,.2),transparent 70%);pointer-events:none}
+nav{position:relative;z-index:10;display:flex;align-items:center;justify-content:space-between;padding:13px 18px;border-bottom:1px solid rgba(255,255,255,.07)}
+.logo{display:flex;align-items:center;gap:8px;cursor:pointer}
+.logo-box{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,#7c3aed,#4f46e5);display:flex;align-items:center;justify-content:center;font-size:15px}
+.logo-name{font-size:17px;font-weight:700}.logo-name span{color:#a78bfa}
+.nav-right{display:flex;gap:5px;align-items:center}
+.nav-user{font-size:11px;color:rgba(255,255,255,.4);max-width:75px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nav-tabs{display:none;gap:3px}.nav-tabs.show{display:flex}
+.nav-tab{padding:6px 10px;border-radius:8px;font-size:11px;font-weight:600;background:none;border:none;color:rgba(255,255,255,.4);cursor:pointer;font-family:inherit;transition:all .2s}
+.nav-tab.on{background:rgba(255,255,255,.09);color:#fff}
+.plan-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;padding:3px 8px;border-radius:99px;cursor:pointer;border:none;font-family:inherit}
+.badge-free{background:rgba(255,255,255,.07);color:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.1)}
+.badge-pro{background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;box-shadow:0 2px 10px rgba(245,158,11,.3)}
+.btn{padding:8px 16px;border-radius:11px;font-weight:600;font-size:12px;cursor:pointer;border:none;font-family:inherit;transition:all .2s;display:inline-flex;align-items:center;justify-content:center;gap:6px;text-decoration:none}
+.btn-p{background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;box-shadow:0 4px 16px rgba(124,58,237,.3)}
+.btn-p:hover{opacity:.9;transform:translateY(-1px)}
+.btn-gold{background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;box-shadow:0 4px 16px rgba(245,158,11,.3)}
+.btn-gold:hover{opacity:.9;transform:translateY(-1px)}
+.btn-g{background:rgba(255,255,255,.06);color:rgba(255,255,255,.75);border:1px solid rgba(255,255,255,.1)}
+.btn-g:hover{background:rgba(255,255,255,.1)}
+.btn-full{width:100%;padding:14px;font-size:14px;border-radius:13px}
+.btn-sm{padding:7px 13px;font-size:11px;border-radius:9px}
+.page{display:none;position:relative;z-index:1;padding:20px 16px;max-width:600px;margin:0 auto}
+.page.show{display:block}
+.badge-pill{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:#c4b5fd;background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.3);border-radius:99px;padding:5px 12px;margin-bottom:16px}
+.dot{width:6px;height:6px;border-radius:50%;background:#a78bfa;animation:blink 1.5s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+h1{font-size:clamp(26px,7vw,44px);font-weight:800;line-height:1.15;letter-spacing:-.02em;margin-bottom:12px}
+.grad{background:linear-gradient(135deg,#a78bfa,#f0abfc,#818cf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.grad-gold{background:linear-gradient(135deg,#fbbf24,#f59e0b);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:20px}
+.group{margin-bottom:15px}
+.lbl{display:block;font-size:10px;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px}
+.inp{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:11px;padding:11px 14px;color:#fff;font-size:14px;font-family:inherit;outline:none;transition:border .2s}
+.inp:focus{border-color:rgba(124,58,237,.5)}
+.inp::placeholder{color:rgba(255,255,255,.25)}
+.tabs{display:flex;gap:3px;background:rgba(255,255,255,.04);border-radius:11px;padding:3px;margin-bottom:16px}
+.tab{flex:1;padding:7px;border-radius:8px;font-size:12px;font-weight:600;background:none;border:none;color:rgba(255,255,255,.4);cursor:pointer;font-family:inherit;transition:all .2s}
+.tab.on{background:rgba(255,255,255,.1);color:#fff}
+.drop{border:2px dashed rgba(255,255,255,.1);border-radius:13px;padding:28px 16px;text-align:center;cursor:pointer;transition:all .2s}
+.drop:hover,.drop.over{border-color:rgba(124,58,237,.45);background:rgba(124,58,237,.04)}
+.lang-sel{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:11px;padding:11px 14px;color:#fff;font-size:14px;font-family:inherit;outline:none;cursor:pointer;appearance:none;-webkit-appearance:none}
+.lang-sel option{background:#0d0d20}
+
+/* LIMIT BAR */
+.lbar{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:12px 14px;margin-bottom:16px}
+.lbar-top{display:flex;justify-content:space-between;margin-bottom:7px}
+.lbar-title{font-size:12px;font-weight:600;color:rgba(255,255,255,.6)}
+.lbar-count{font-size:12px;font-weight:700}
+.c-ok{color:#4ade80}.c-warn{color:#f59e0b}.c-danger{color:#f87171}
+.lbar-bg{width:100%;height:6px;background:rgba(255,255,255,.06);border-radius:99px;overflow:hidden}
+.lbar-fill{height:100%;border-radius:99px;transition:width .5s}
+.f-ok{background:linear-gradient(90deg,#7c3aed,#4f46e5)}
+.f-warn{background:linear-gradient(90deg,#f59e0b,#d97706)}
+.f-danger{background:linear-gradient(90deg,#f87171,#ef4444)}
+.f-pro{background:linear-gradient(90deg,#f59e0b,#fbbf24)}
+.lbar-hint{font-size:10px;color:rgba(255,255,255,.3);margin-top:6px}
+
+/* PROGRESS */
+.prog-bg{width:100%;height:9px;background:rgba(255,255,255,.06);border-radius:99px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,#7c3aed,#4f46e5,#a855f7);border-radius:99px;transition:width .6s;width:0%}
+.prog-info{display:flex;justify-content:space-between;font-size:11px;color:rgba(255,255,255,.35);margin-top:7px}
+.prog-pct{color:#a78bfa;font-weight:700;font-family:monospace}
+.pdot{flex:1;height:3px;border-radius:99px;background:rgba(255,255,255,.07);transition:background .3s}
+.pdot.done{background:#7c3aed}
+.prog-dots{display:flex;gap:2px;margin-top:8px}
+.prog-msg{font-size:11px;color:rgba(255,255,255,.4);text-align:center;margin-top:10px}
+
+/* RESULT */
+.vid-box{width:100%;border-radius:12px;overflow:hidden;background:#000;border:1px solid rgba(255,255,255,.1);margin-bottom:10px}
+.vid-box video{width:100%;max-height:240px;display:block;object-fit:contain}
+.trans-box{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:13px}
+
+/* PAYWALL MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s}
+.modal-overlay.show{opacity:1;pointer-events:all}
+.modal-sheet{background:linear-gradient(180deg,#0f0f2a,#07071a);border:1px solid rgba(255,255,255,.1);border-top-left-radius:24px;border-top-right-radius:24px;padding:24px 18px 36px;width:100%;max-width:500px;transform:translateY(100%);transition:transform .4s cubic-bezier(.34,1.56,.64,1)}
+.modal-overlay.show .modal-sheet{transform:translateY(0)}
+.modal-drag{width:40px;height:4px;background:rgba(255,255,255,.15);border-radius:99px;margin:0 auto 18px}
+.plan-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0}
+.pc{border-radius:14px;padding:14px;border:2px solid transparent;cursor:pointer;transition:all .2s;position:relative}
+.pc-free{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.1)}
+.pc-monthly{background:rgba(124,58,237,.1);border-color:rgba(124,58,237,.4)}
+.pc-yearly{background:rgba(245,158,11,.1);border-color:rgba(245,158,11,.4)}
+.pc.sel{transform:scale(1.03)}
+.pc-monthly.sel{box-shadow:0 0 18px rgba(124,58,237,.35)}
+.pc-yearly.sel{box-shadow:0 0 18px rgba(245,158,11,.35)}
+.pc-popular{position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;font-size:9px;font-weight:700;padding:3px 10px;border-radius:99px;white-space:nowrap}
+.pc-name{font-size:12px;font-weight:700;margin-bottom:3px}
+.pc-price{font-size:20px;font-weight:800}
+.pc-price span{font-size:10px;font-weight:400;color:rgba(255,255,255,.4)}
+.pc-videos{font-size:10px;color:rgba(255,255,255,.45);margin:4px 0 8px}
+.pc-feats{list-style:none;display:flex;flex-direction:column;gap:4px}
+.pc-feats li{font-size:10px;color:rgba(255,255,255,.6);display:flex;align-items:center;gap:4px}
+.pc-feats li::before{content:'✓';color:#4ade80;font-weight:700;font-size:9px}
+.pc-feats li.no{color:rgba(255,255,255,.25)}
+.pc-feats li.no::before{content:'✗';color:#f87171}
+
+/* PRICING PAGE */
+.p-card{border-radius:18px;padding:20px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);margin-bottom:12px;position:relative}
+.p-card.hi{background:rgba(124,58,237,.1);border-color:rgba(124,58,237,.4)}
+.p-card.gold{background:rgba(245,158,11,.1);border-color:rgba(245,158,11,.35)}
+
+/* AUTH */
+.auth-center{display:flex;justify-content:center;align-items:center;min-height:70vh}
+.auth-ico{width:48px;height:48px;border-radius:13px;background:linear-gradient(135deg,#7c3aed,#4f46e5);display:flex;align-items:center;justify-content:center;font-size:20px;margin:0 auto 12px;box-shadow:0 8px 24px rgba(124,58,237,.35)}
+.err{color:#f87171;font-size:12px;text-align:center;padding:8px;background:rgba(248,113,113,.08);border-radius:9px;margin-bottom:10px;display:none}
+.auth-foot{text-align:center;font-size:12px;color:rgba(255,255,255,.35);margin-top:14px}
+.auth-foot a{color:#a78bfa;cursor:pointer}
+
+/* DASHBOARD */
+.vid-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:14px;overflow:hidden;margin-bottom:10px}
+.vid-thumb{width:100%;height:120px;background:#111;position:relative;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.vid-thumb video{width:100%;height:100%;object-fit:cover;display:none}
+.play-d{position:absolute;width:42px;height:42px;border-radius:50%;background:rgba(124,58,237,.8);display:flex;align-items:center;justify-content:center;font-size:17px}
+.vid-body{padding:11px}
+
+/* TOAST */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);background:#1a1a2e;border:1px solid rgba(255,255,255,.1);border-radius:11px;padding:10px 18px;font-size:13px;z-index:999;opacity:0;transition:all .3s;pointer-events:none;max-width:88vw;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.ok{border-color:rgba(74,222,128,.3);color:#4ade80}
+.toast.warn{border-color:rgba(245,158,11,.3);color:#fbbf24}
+.spinner{display:inline-block;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.err-box{background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.2);border-radius:12px;padding:14px;color:#fca5a5;font-size:13px;text-align:center}
+.empty{text-align:center;padding:48px 16px}
+</style>
+</head>
+<body>
+<div class="orb1"></div><div class="orb2"></div>
+<div class="toast" id="toast"></div>
+
+<!-- ══ PAYWALL MODAL ═══════════════════════════════════════ -->
+<div class="modal-overlay" id="paywall">
+  <div class="modal-sheet">
+    <div class="modal-drag"></div>
+    <div style="text-align:center;font-size:40px;margin-bottom:8px">👑</div>
+    <div style="text-align:center;font-size:21px;font-weight:800;margin-bottom:6px">Free Limit Khatam!</div>
+    <div style="text-align:center;font-size:13px;color:rgba(255,255,255,.45);margin-bottom:20px;line-height:1.6">Aapne <strong>5 free videos</strong> use kar li hain.<br>Unlimited dubbing ke liye Premium lo.</div>
+
+    <div class="plan-grid">
+      <div class="pc pc-monthly" id="pw-monthly" onclick="selPlan('monthly')">
+        <div class="pc-name">Pro Monthly</div>
+        <div class="pc-price">₹299<span>/mo</span></div>
+        <div class="pc-videos">Unlimited videos</div>
+        <ul class="pc-feats">
+          <li>Unlimited dubs</li>
+          <li>30+ languages</li>
+          <li>HD quality</li>
+          <li class="no">Annual saving</li>
+        </ul>
+      </div>
+      <div class="pc pc-yearly sel" id="pw-yearly" onclick="selPlan('yearly')">
+        <div class="pc-popular">🔥 Best Value</div>
+        <div class="pc-name">Pro Yearly</div>
+        <div class="pc-price">₹199<span>/mo</span></div>
+        <div class="pc-videos" style="color:#fbbf24">33% off!</div>
+        <ul class="pc-feats">
+          <li>Unlimited dubs</li>
+          <li>30+ languages</li>
+          <li>HD quality</li>
+          <li>₹1,200 saved!</li>
+        </ul>
+      </div>
+    </div>
+
+    <button class="btn btn-gold btn-full" style="font-size:14px;padding:14px" onclick="buyPlan()">✨ Premium Activate Karo</button>
+    <button class="btn btn-g btn-full" style="margin-top:8px;font-size:12px" onclick="closePaywall()">Baad Mein (Limit Khatam)</button>
+    <div style="text-align:center;font-size:10px;color:rgba(255,255,255,.2);margin-top:12px">🔒 Secure payment · Cancel anytime · 7-day refund</div>
+  </div>
+</div>
+
+<!-- NAVBAR -->
+<nav>
+  <div class="logo" onclick="go('landing')">
+    <div class="logo-box">🎙</div>
+    <div class="logo-name">Dubee<span>.ai</span></div>
+  </div>
+  <div class="nav-tabs" id="ntabs">
+    <button class="nav-tab on" id="nt-home" onclick="go('home')">✦ Dub</button>
+    <button class="nav-tab" id="nt-dashboard" onclick="go('dashboard')">📁 Saved</button>
+    <button class="nav-tab" id="nt-pricing" onclick="go('pricing')">💎 Plans</button>
+  </div>
+  <div class="nav-right">
+    <button class="plan-badge badge-free" id="nav-plan" onclick="go('pricing')" style="display:none">FREE</button>
+    <span class="nav-user" id="nuname"></span>
+    <button class="btn btn-g" id="b-in" onclick="go('login')" style="font-size:11px;padding:6px 11px">Sign In</button>
+    <button class="btn btn-p" id="b-up" onclick="go('signup')" style="font-size:11px;padding:6px 11px">Free Shuru</button>
+    <button class="btn btn-g" id="b-out" onclick="logout()" style="font-size:11px;padding:6px 11px;display:none">Logout</button>
+  </div>
+</nav>
+
+<!-- LANDING -->
+<div class="page show" id="pg-landing">
+  <div style="text-align:center;padding:32px 0 20px">
+    <div class="badge-pill"><span class="dot"></span> GPT-4o + ElevenLabs</div>
+    <h1>Koi bhi video,<br><span class="grad">koi bhi awaaz</span></h1>
+    <p style="font-size:14px;color:rgba(255,255,255,.5);line-height:1.7;margin-bottom:24px">Video upload karo, language choose karo. Asli AI awaaz mein dubbed video milegi.</p>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:32px">
+      <button class="btn btn-p" style="font-size:13px;padding:11px 22px" onclick="go('signup')">5 Videos Free Shuru →</button>
+      <button class="btn btn-g" style="font-size:13px;padding:11px 22px" onclick="go('login')">Sign In</button>
+    </div>
+    <div style="display:flex;justify-content:center;gap:24px;padding-top:22px;border-top:1px solid rgba(255,255,255,.06);flex-wrap:wrap">
+      <div style="text-align:center"><div style="font-size:20px;font-weight:700;color:#c4b5fd">5</div><div style="font-size:11px;color:rgba(255,255,255,.35)">Free Videos</div></div>
+      <div style="text-align:center"><div style="font-size:20px;font-weight:700;color:#c4b5fd">30+</div><div style="font-size:11px;color:rgba(255,255,255,.35)">Languages</div></div>
+      <div style="text-align:center"><div style="font-size:20px;font-weight:700;color:#fbbf24">₹199</div><div style="font-size:11px;color:rgba(255,255,255,.35)">/mo Premium</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- HOME -->
+<div class="page" id="pg-home">
+  <div style="text-align:center;margin-bottom:16px">
+    <h2 style="font-size:21px;font-weight:800;margin-bottom:4px">🎙 Video Dub Karo</h2>
+    <p style="color:rgba(255,255,255,.4);font-size:12px">Whisper + GPT-4o + ElevenLabs</p>
+  </div>
+  <div class="card">
+    <!-- LIMIT BAR -->
+    <div class="lbar" id="lbar">
+      <div class="lbar-top">
+        <span class="lbar-title" id="lb-title">🎬 Free Videos</span>
+        <span class="lbar-count c-ok" id="lb-count">0 / 5</span>
+      </div>
+      <div class="lbar-bg"><div class="lbar-fill f-ok" id="lb-fill" style="width:0%"></div></div>
+      <div class="lbar-hint" id="lb-hint">5 free videos bachi hain</div>
+    </div>
+
+    <!-- FORM -->
+    <div id="dub-form">
+      <div class="tabs">
+        <button class="tab on" id="t-url" onclick="swTab('url')">🔗 URL</button>
+        <button class="tab" id="t-file" onclick="swTab('file')">📁 Upload</button>
+      </div>
+      <div id="p-url" class="group">
+        <label class="lbl">Direct MP4 URL</label>
+        <input class="inp" id="vid-url" placeholder="https://example.com/video.mp4"/>
+      </div>
+      <div id="p-file" class="group" style="display:none">
+        <label class="lbl">Video File (200MB tak)</label>
+        <div class="drop" id="dz" onclick="document.getElementById('fi').click()"
+          ondragover="event.preventDefault();this.classList.add('over')"
+          ondragleave="this.classList.remove('over')" ondrop="onDrop(event)">
+          <input type="file" id="fi" accept="video/*" style="display:none" onchange="onFile(this.files[0])"/>
+          <div id="d-ico" style="font-size:28px;opacity:.3;margin-bottom:6px">📤</div>
+          <div id="d-txt" style="font-size:13px;color:rgba(255,255,255,.4)">Tap karke choose karo</div>
+          <div id="d-hint" style="font-size:11px;color:rgba(255,255,255,.2);margin-top:3px">MP4, MOV, AVI</div>
+        </div>
+      </div>
+      <div class="group">
+        <label class="lbl">🌍 Target Language</label>
+        <select class="lang-sel" id="lang-sel">
+          <option value="Hindi" data-flag="🇮🇳">🇮🇳 Hindi</option>
+          <option value="English" data-flag="🇺🇸">🇺🇸 English</option>
+          <option value="Spanish" data-flag="🇪🇸">🇪🇸 Spanish</option>
+          <option value="French" data-flag="🇫🇷">🇫🇷 French</option>
+          <option value="German" data-flag="🇩🇪">🇩🇪 German</option>
+          <option value="Portuguese" data-flag="🇧🇷">🇧🇷 Portuguese</option>
+          <option value="Italian" data-flag="🇮🇹">🇮🇹 Italian</option>
+          <option value="Russian" data-flag="🇷🇺">🇷🇺 Russian</option>
+          <option value="Chinese" data-flag="🇨🇳">🇨🇳 Chinese</option>
+          <option value="Japanese" data-flag="🇯🇵">🇯🇵 Japanese</option>
+          <option value="Korean" data-flag="🇰🇷">🇰🇷 Korean</option>
+          <option value="Arabic" data-flag="🇸🇦">🇸🇦 Arabic</option>
+          <option value="Turkish" data-flag="🇹🇷">🇹🇷 Turkish</option>
+          <option value="Urdu" data-flag="🇵🇰">🇵🇰 Urdu</option>
+          <option value="Bengali" data-flag="🇧🇩">🇧🇩 Bengali</option>
+          <option value="Vietnamese" data-flag="🇻🇳">🇻🇳 Vietnamese</option>
+          <option value="Thai" data-flag="🇹🇭">🇹🇭 Thai</option>
+          <option value="Indonesian" data-flag="🇮🇩">🇮🇩 Indonesian</option>
+          <option value="Dutch" data-flag="🇳🇱">🇳🇱 Dutch</option>
+          <option value="Polish" data-flag="🇵🇱">🇵🇱 Polish</option>
+        </select>
+      </div>
+      <button class="btn btn-p btn-full" onclick="startDub()" id="dub-btn">🎙 AI Dubbing Shuru Karo</button>
+    </div>
+
+    <!-- PROGRESS -->
+    <div id="dub-prog" style="display:none">
+      <div style="display:flex;justify-content:space-between;margin-bottom:12px">
+        <span style="font-size:14px;font-weight:600;color:#c4b5fd">⚡ AI Processing…</span>
+        <span style="font-size:11px;color:rgba(255,255,255,.35)" id="p-eta">~2 min</span>
+      </div>
+      <div class="prog-bg"><div class="prog-fill" id="p-fill"></div></div>
+      <div class="prog-info"><span id="p-step">Shuru…</span><span class="prog-pct" id="p-pct">0%</span></div>
+      <div class="prog-dots" id="p-dots"></div>
+      <div class="prog-msg" id="p-msg">Real AI dubbing chal rahi hai…</div>
+    </div>
+
+    <!-- ERROR -->
+    <div id="dub-err" style="display:none">
+      <div class="err-box">
+        <div style="font-size:28px;margin-bottom:8px">⚠️</div>
+        <div id="err-msg">Kuch galat hua</div>
+        <button class="btn btn-g btn-sm" style="margin-top:12px" onclick="resetDub()">← Wapas</button>
+      </div>
+    </div>
+
+    <!-- RESULT -->
+    <div id="dub-res" style="display:none">
+      <div style="color:#4ade80;font-size:13px;font-weight:600;margin-bottom:12px">✅ Dubbed Video Ready!</div>
+      <div class="vid-box"><video id="res-vid" controls autoplay></video></div>
+      <div style="display:flex;gap:10px;font-size:11px;color:rgba(255,255,255,.4);margin-bottom:12px;flex-wrap:wrap">
+        <span id="r-lang">🇮🇳 Hindi</span><span>•</span><span id="r-size">— MB</span>
+      </div>
+      <div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px">
+        <a class="btn btn-p btn-sm" id="dl-btn" href="#" download="dubbed.mp4">⬇ Download</a>
+        <button class="btn btn-g btn-sm" id="save-btn" onclick="saveVid()">💾 Save</button>
+        <button class="btn btn-g btn-sm" onclick="resetDub()">← Wapas</button>
+      </div>
+      <div class="trans-box">
+        <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.4);margin-bottom:10px">📝 AI Translation</div>
+        <div style="margin-bottom:8px">
+          <div style="font-size:10px;color:rgba(255,255,255,.3);margin-bottom:3px">ORIGINAL</div>
+          <div style="font-size:12px;line-height:1.6;color:rgba(255,255,255,.7)" id="t-orig">—</div>
+        </div>
+        <div>
+          <div style="font-size:10px;color:#a78bfa;margin-bottom:3px" id="t-tag">TRANSLATION</div>
+          <div style="font-size:12px;line-height:1.6;color:#c4b5fd" id="t-trans">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PRICING -->
+<div class="page" id="pg-pricing">
+  <div style="text-align:center;padding:20px 0 16px">
+    <h2 style="font-size:24px;font-weight:800;margin-bottom:6px">💎 Plans & Pricing</h2>
+    <p style="font-size:13px;color:rgba(255,255,255,.45)">5 videos free, phir Premium lo unlimited ke liye</p>
+  </div>
+
+  <!-- FREE -->
+  <div class="p-card">
+    <div style="display:inline-block;font-size:10px;font-weight:700;padding:3px 10px;border-radius:99px;background:rgba(255,255,255,.07);color:rgba(255,255,255,.5);margin-bottom:10px">FREE</div>
+    <div style="font-size:18px;font-weight:800;margin-bottom:4px">Free Plan</div>
+    <div style="font-size:32px;font-weight:800;margin-bottom:4px">₹0<span style="font-size:13px;font-weight:400;color:rgba(255,255,255,.4)">/forever</span></div>
+    <div style="font-size:12px;color:rgba(255,255,255,.45);margin-bottom:14px">Shuru karne ke liye bilkul perfect</div>
+    <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:16px">
+      <div style="font-size:13px;color:rgba(255,255,255,.7)">✅ 5 videos total</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.7)">✅ 20+ languages</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.7)">✅ HD quality</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.3)">❌ Unlimited videos</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.3)">❌ Priority processing</div>
+    </div>
+    <button class="btn btn-g btn-full" onclick="go('home')">Current Plan</button>
+  </div>
+
+  <!-- PRO MONTHLY -->
+  <div class="p-card hi">
+    <div style="display:inline-block;font-size:10px;font-weight:700;padding:3px 10px;border-radius:99px;background:rgba(124,58,237,.3);color:#c4b5fd;margin-bottom:10px">PRO</div>
+    <div style="font-size:18px;font-weight:800;margin-bottom:4px">Pro Monthly</div>
+    <div style="font-size:32px;font-weight:800;margin-bottom:4px">₹299<span style="font-size:13px;font-weight:400;color:rgba(255,255,255,.4)">/month</span></div>
+    <div style="font-size:12px;color:rgba(255,255,255,.45);margin-bottom:14px">Serious creators ke liye. Cancel anytime.</div>
+    <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:16px">
+      <div style="font-size:13px;color:rgba(255,255,255,.7)">✅ Unlimited videos</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.7)">✅ 30+ languages</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.7)">✅ HD quality</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.7)">✅ Dashboard history</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.3)">❌ Annual discount</div>
+    </div>
+    <button class="btn btn-p btn-full" onclick="showPaywall()">Get Pro Monthly</button>
+  </div>
+
+  <!-- PRO YEARLY -->
+  <div class="p-card gold" style="position:relative;padding-top:30px">
+    <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;font-size:10px;font-weight:700;padding:4px 14px;border-radius:99px;white-space:nowrap">🔥 Most Popular — 33% Off!</div>
+    <div style="display:inline-block;font-size:10px;font-weight:700;padding:3px 10px;border-radius:99px;background:rgba(245,158,11,.2);color:#fbbf24;margin-bottom:10px">PRO YEARLY</div>
+    <div style="font-size:18px;font-weight:800;margin-bottom:4px">Pro Yearly</div>
+    <div style="font-size:32px;font-weight:800;margin-bottom:2px"><span class="grad-gold">₹199</span><span style="font-size:13px;font-weight:400;color:rgba(255,255,255,.4)">/month</span></div>
+    <div style="font-size:12px;color:#fbbf24;margin-bottom:4px">₹2,388/year · Save ₹1,200!</div>
+    <div style="font-size:12px;color:rgba(255,255,255,.45);margin-bottom:14px">Best value for regular creators.</div>
+    <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:16px">
+      <div style="font-size:13px;color:rgba(255,255,255,.7)">✅ Unlimited videos</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.7)">✅ 30+ languages</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.7)">✅ Priority processing</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.7)">✅ Dashboard history</div>
+      <div style="font-size:13px;color:#fbbf24">✅ ₹1,200 annual savings!</div>
+    </div>
+    <button class="btn btn-gold btn-full" onclick="showPaywall()">✨ Get Pro Yearly — Best Deal</button>
+  </div>
+  <div style="text-align:center;font-size:11px;color:rgba(255,255,255,.2);margin-top:10px;padding-bottom:20px">🔒 Secure · 7-day refund · Cancel anytime</div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="page" id="pg-dashboard">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px">
+    <div>
+      <div style="font-size:20px;font-weight:700">Meri Videos</div>
+      <div style="font-size:12px;color:rgba(255,255,255,.4);margin-top:3px" id="dash-count">0 videos</div>
+    </div>
+    <button class="btn btn-p btn-sm" onclick="go('home')">+ Naya Dub</button>
+  </div>
+  <div id="vid-list"></div>
+</div>
+
+<!-- LOGIN -->
+<div class="page" id="pg-login">
+  <div class="auth-center">
+    <div class="card" style="width:100%;max-width:360px">
+      <div class="auth-ico">🎙</div>
+      <div style="text-align:center;font-size:19px;font-weight:700;margin-bottom:4px">Wapas Aao!</div>
+      <div style="text-align:center;font-size:13px;color:rgba(255,255,255,.4);margin-bottom:20px">Dubee.ai mein sign in karo</div>
+      <div class="group"><label class="lbl">Email</label><input class="inp" id="l-email" type="email" placeholder="aap@example.com"/></div>
+      <div class="group"><label class="lbl">Password</label><input class="inp" id="l-pass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"/></div>
+      <div class="err" id="l-err"></div>
+      <button class="btn btn-p btn-full" id="l-btn" onclick="doLogin()">Sign In</button>
+      <div class="auth-foot">Account nahi? <a onclick="go('signup')">Sign up karo</a></div>
+      <div style="text-align:center;font-size:10px;color:rgba(255,255,255,.2);margin-top:8px">Demo: demo@dubee.ai / demo123</div>
+    </div>
+  </div>
+</div>
+
+<!-- SIGNUP -->
+<div class="page" id="pg-signup">
+  <div class="auth-center">
+    <div class="card" style="width:100%;max-width:360px">
+      <div class="auth-ico">🎙</div>
+      <div style="text-align:center;font-size:19px;font-weight:700;margin-bottom:4px">Account Banao</div>
+      <div style="text-align:center;font-size:13px;color:rgba(255,255,255,.4);margin-bottom:20px">5 videos bilkul free! 🎉</div>
+      <div class="group"><label class="lbl">Naam</label><input class="inp" id="s-name" placeholder="Poora naam"/></div>
+      <div class="group"><label class="lbl">Email</label><input class="inp" id="s-email" type="email" placeholder="aap@example.com"/></div>
+      <div class="group"><label class="lbl">Password</label><input class="inp" id="s-pass" type="password" placeholder="6+ characters" onkeydown="if(event.key==='Enter')doSignup()"/></div>
+      <div class="err" id="s-err"></div>
+      <button class="btn btn-p btn-full" id="s-btn" onclick="doSignup()">Account Banao — Free</button>
+      <div class="auth-foot">Pehle se hai? <a onclick="go('login')">Sign in karo</a></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const FREE_LIMIT = 5;
+const STEPS = ['Video upload ho rahi hai…','Audio extract ho raha hai…','Whisper se transcribe…','GPT-4o se translate…','ElevenLabs awaaz bana raha hai…','Audio sync ho raha hai…','FFmpeg merge kar raha hai…','Output optimize ho raha hai…','Ready ho raha hai…'];
+
+let users = [{ email:'demo@dubee.ai', pass:'demo123', name:'Demo User', plan:'free', dubs:3 }];
+let savedVids = [], me = null, selFile = null, curTab = 'url', curVid = null, progIv = null, selPlanId = 'yearly';
+
+// Build dots
+(function(){ const c=document.getElementById('p-dots'); STEPS.forEach((_,i)=>{ const d=document.createElement('div'); d.className='pdot'; d.id='pd'+i; c.appendChild(d); }); })();
+
+// NAV
+function go(p){
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('show'));
+  document.getElementById('pg-'+p).classList.add('show');
+  document.querySelectorAll('.nav-tab').forEach(x=>x.classList.remove('on'));
+  const nt=document.getElementById('nt-'+p); if(nt) nt.classList.add('on');
+  if(p==='dashboard') renderDash();
+  if(p==='home') updateLbar();
+  window.scrollTo(0,0);
+}
+function updateNav(){
+  const li=!!me;
+  document.getElementById('ntabs').className='nav-tabs'+(li?' show':'');
+  document.getElementById('nuname').textContent=li?me.name:'';
+  document.getElementById('b-in').style.display=li?'none':'';
+  document.getElementById('b-up').style.display=li?'none':'';
+  document.getElementById('b-out').style.display=li?'':'none';
+  const pb=document.getElementById('nav-plan');
+  if(li){
+    pb.style.display='';
+    if(me.plan==='pro'){ pb.className='plan-badge badge-pro'; pb.textContent='👑 PRO'; }
+    else { pb.className='plan-badge badge-free'; pb.textContent='FREE '+(me.dubs||0)+'/'+FREE_LIMIT; }
+  } else pb.style.display='none';
+}
+function logout(){ me=null; updateNav(); go('landing'); }
+
+// LIMIT BAR
+function updateLbar(){
+  if(!me) return;
+  if(me.plan==='pro'){
+    document.getElementById('lbar').style.borderColor='rgba(245,158,11,.2)';
+    document.getElementById('lb-title').textContent='👑 Pro — Unlimited';
+    document.getElementById('lb-count').textContent='∞';
+    document.getElementById('lb-count').className='lbar-count c-ok';
+    document.getElementById('lb-fill').style.width='100%';
+    document.getElementById('lb-fill').className='lbar-fill f-pro';
+    document.getElementById('lb-hint').textContent='Koi limit nahi! Unlimited dub karo.';
+    document.getElementById('dub-btn').className='btn btn-p btn-full';
+    document.getElementById('dub-btn').textContent='🎙 AI Dubbing Shuru Karo';
+    return;
+  }
+  const used=me.dubs||0, left=FREE_LIMIT-used, pct=(used/FREE_LIMIT)*100;
+  document.getElementById('lb-count').textContent=used+' / '+FREE_LIMIT;
+  document.getElementById('lb-fill').style.width=pct+'%';
+  if(left<=0){
+    document.getElementById('lb-count').className='lbar-count c-danger';
+    document.getElementById('lb-fill').className='lbar-fill f-danger';
+    document.getElementById('lb-hint').textContent='⚠️ Free limit khatam! Premium lo unlimited ke liye.';
+    document.getElementById('dub-btn').className='btn btn-gold btn-full';
+    document.getElementById('dub-btn').textContent='👑 Premium Lo — Unlimited Dubbing';
+  } else if(left<=2){
+    document.getElementById('lb-count').className='lbar-count c-warn';
+    document.getElementById('lb-fill').className='lbar-fill f-warn';
+    document.getElementById('lb-hint').textContent='⚡ Sirf '+left+' free video'+(left>1?'en':'')+' bachi!';
+  } else {
+    document.getElementById('lb-count').className='lbar-count c-ok';
+    document.getElementById('lb-fill').className='lbar-fill f-ok';
+    document.getElementById('lb-hint').textContent=left+' free videos bachi hain — Premium ke baad unlimited!';
+  }
+  updateNav();
+}
+
+// PAYWALL
+function showPaywall(){ document.getElementById('paywall').classList.add('show'); }
+function closePaywall(){ document.getElementById('paywall').classList.remove('show'); }
+function selPlan(p){
+  selPlanId=p;
+  document.getElementById('pw-monthly').classList.toggle('sel', p==='monthly');
+  document.getElementById('pw-yearly').classList.toggle('sel', p==='yearly');
+}
+function buyPlan(){
+  closePaywall();
+  // Real app: Razorpay ya Stripe connect karo
+  // Demo mein simulate karte hain
+  toast('💳 Payment gateway — Real app mein Razorpay connect karo!','warn');
+  setTimeout(()=>{
+    if(me){ me.plan='pro'; me.dubs=0; updateNav(); updateLbar(); toast('👑 Pro activate ho gaya! Unlimited dubbing!','ok'); }
+  }, 1500);
+}
+document.getElementById('paywall').addEventListener('click', function(e){ if(e.target===this) closePaywall(); });
+
+// AUTH
+async function doLogin(){
+  const e=document.getElementById('l-email').value.trim(), p=document.getElementById('l-pass').value;
+  hideErr('l-err');
+  if(!e||!p){ showErr('l-err','Sab fields bharein'); return; }
+  const btn=document.getElementById('l-btn');
+  btn.innerHTML='<span class="spinner">⟳</span> Wait…'; btn.disabled=true;
+  await sleep(600);
+  const u=users.find(x=>x.email===e&&x.pass===p);
+  btn.innerHTML='Sign In'; btn.disabled=false;
+  if(!u){ showErr('l-err','Email ya password galat hai'); return; }
+  me=u; updateNav(); updateLbar(); go('home');
+}
+async function doSignup(){
+  const n=document.getElementById('s-name').value.trim(), e=document.getElementById('s-email').value.trim(), p=document.getElementById('s-pass').value;
+  hideErr('s-err');
+  if(!n||!e||!p){ showErr('s-err','Sab fields bharein'); return; }
+  if(p.length<6){ showErr('s-err','Password 6+ characters'); return; }
+  if(users.find(x=>x.email===e)){ showErr('s-err','Email pehle se registered hai'); return; }
+  const btn=document.getElementById('s-btn');
+  btn.innerHTML='<span class="spinner">⟳</span> Bana raha hai…'; btn.disabled=true;
+  await sleep(600);
+  const u={email:e,pass:p,name:n,plan:'free',dubs:0};
+  users.push(u); me=u; btn.innerHTML='Account Banao — Free'; btn.disabled=false;
+  updateNav(); updateLbar(); go('home');
+}
+function showErr(id,msg){ const el=document.getElementById(id); el.textContent=msg; el.style.display='block'; }
+function hideErr(id){ document.getElementById(id).style.display='none'; }
+
+// TAB & FILE
+function swTab(t){
+  curTab=t;
+  document.getElementById('p-url').style.display=t==='url'?'':'none';
+  document.getElementById('p-file').style.display=t==='file'?'':'none';
+  document.getElementById('t-url').className='tab'+(t==='url'?' on':'');
+  document.getElementById('t-file').className='tab'+(t==='file'?' on':'');
+}
+function onDrop(e){ e.preventDefault(); document.getElementById('dz').classList.remove('over'); const f=e.dataTransfer.files[0]; if(f&&f.type.startsWith('video/')) setFile(f); }
+function onFile(f){ if(f) setFile(f); }
+function setFile(f){ selFile=f; document.getElementById('d-ico').textContent='🎬'; document.getElementById('d-txt').textContent=f.name; document.getElementById('d-hint').textContent=(f.size/1024/1024).toFixed(1)+' MB'; }
+
+// PROGRESS
+function startProg(){
+  let pct=0; const total=120000, start=Date.now();
+  progIv=setInterval(()=>{
+    const el=Date.now()-start;
+    pct=Math.min(el/total*90,90);
+    const si=Math.min(Math.floor(pct/90*STEPS.length),STEPS.length-1);
+    const eta=Math.max(Math.ceil((total-el)/1000),1);
+    document.getElementById('p-fill').style.width=pct+'%';
+    document.getElementById('p-pct').textContent=Math.round(pct)+'%';
+    document.getElementById('p-step').textContent=STEPS[si];
+    document.getElementById('p-eta').textContent=eta>60?Math.ceil(eta/60)+' min':eta+'s';
+    document.getElementById('p-msg').textContent=pct<20?'Upload ho rahi hai…':pct<45?'Whisper transcribe kar raha hai…':pct<65?'GPT-4o translate kar raha hai…':pct<85?'ElevenLabs awaaz bana raha hai…':'FFmpeg merge kar raha hai…';
+    for(let i=0;i<STEPS.length;i++){ const d=document.getElementById('pd'+i); if(d) d.className='pdot'+((i+1)/STEPS.length*90<=pct?' done':''); }
+  },200);
+}
+function stopProg(ok){
+  clearInterval(progIv);
+  if(ok){ document.getElementById('p-fill').style.width='100%'; document.getElementById('p-pct').textContent='100%'; for(let i=0;i<STEPS.length;i++){ const d=document.getElementById('pd'+i); if(d) d.className='pdot done'; } }
+}
+
+// MAIN DUB — limit check pehle!
+async function startDub(){
+  if(!me){ go('login'); return; }
+
+  // ─── FREE LIMIT CHECK ────────────────────────────────
+  if(me.plan!=='pro' && (me.dubs||0)>=FREE_LIMIT){
+    showPaywall(); // Paywall dikhao
+    return;
+  }
+
+  const url=document.getElementById('vid-url').value.trim();
+  if(curTab==='url'&&!url){ toast('Video URL daalo',''); return; }
+  if(curTab==='file'&&!selFile){ toast('Pehle video choose karo',''); return; }
+
+  const lang=document.getElementById('lang-sel').value;
+  const flag=document.getElementById('lang-sel').options[document.getElementById('lang-sel').selectedIndex].getAttribute('data-flag')||'🎙';
+
+  document.getElementById('dub-form').style.display='none';
+  document.getElementById('dub-prog').style.display='';
+  document.getElementById('dub-err').style.display='none';
+  document.getElementById('dub-res').style.display='none';
+
+  startProg();
+
+  try {
+    const fd=new FormData();
+    fd.append('language',lang);
+    if(curTab==='file'&&selFile) fd.append('video',selFile);
+    else fd.append('videoUrl',url);
+
+    const resp=await fetch('/api/dub',{method:'POST',body:fd});
+    stopProg(resp.ok);
+
+    if(!resp.ok){ const err=await resp.json(); throw new Error(err.error||'Server error'); }
+
+    const data=await resp.json();
+    await sleep(300);
+
+    // ─── INCREMENT DUB COUNT ─────────────────────────
+    if(me.plan!=='pro'){
+      me.dubs=(me.dubs||0)+1;
+      updateLbar(); updateNav();
+      const left=FREE_LIMIT-me.dubs;
+      if(left===1) toast('⚡ Sirf 1 free video bachi! Phir Premium chahiye.','warn');
+      else if(left===0) toast('🚨 Ye aapki aakhri free video thi! Premium lo unlimited ke liye.','warn');
+    }
+
+    // ─── SHOW RESULT ─────────────────────────────────
+    document.getElementById('dub-prog').style.display='none';
+    document.getElementById('dub-res').style.display='';
+    const vid=document.getElementById('res-vid');
+    vid.src=data.videoUrl; vid.load(); vid.play().catch(()=>{});
+    document.getElementById('dl-btn').href=data.videoUrl;
+    document.getElementById('r-lang').textContent=flag+' '+data.language;
+    document.getElementById('r-size').textContent=data.sizeMB+' MB';
+    document.getElementById('t-orig').textContent=data.originalText||'—';
+    document.getElementById('t-tag').textContent=data.language.toUpperCase()+' TRANSLATION';
+    document.getElementById('t-trans').textContent=data.translatedText||'—';
+    curVid={id:'v'+Date.now(),user:me.email,title:selFile?selFile.name.replace(/\.\w+$/,''):'Dubbed Video',lang:data.language,flag,date:new Date().toISOString().split('T')[0],size:data.sizeMB+' MB',videoUrl:data.videoUrl};
+    document.getElementById('save-btn').style.display='';
+
+  } catch(err){
+    stopProg(false);
+    document.getElementById('dub-prog').style.display='none';
+    document.getElementById('dub-err').style.display='';
+    document.getElementById('err-msg').textContent=err.message;
+  }
+}
+
+function saveVid(){ if(!curVid) return; savedVids.unshift(curVid); document.getElementById('save-btn').style.display='none'; toast('✅ Dashboard mein save ho gaya!','ok'); }
+
+function resetDub(){
+  clearInterval(progIv);
+  ['dub-form'].forEach(id=>document.getElementById(id).style.display='');
+  ['dub-prog','dub-err','dub-res'].forEach(id=>document.getElementById(id).style.display='none');
+  document.getElementById('vid-url').value=''; selFile=null; curVid=null;
+  document.getElementById('d-ico').textContent='📤'; document.getElementById('d-txt').textContent='Tap karke choose karo'; document.getElementById('d-hint').textContent='MP4, MOV, AVI';
+  document.getElementById('p-fill').style.width='0%';
+  for(let i=0;i<STEPS.length;i++){ const d=document.getElementById('pd'+i); if(d) d.className='pdot'; }
+  updateLbar();
+}
+
+// DASHBOARD
+function renderDash(){
+  const my=savedVids.filter(v=>v.user===me?.email);
+  document.getElementById('dash-count').textContent=my.length+' video'+(my.length!==1?'s':'');
+  const list=document.getElementById('vid-list');
+  if(my.length===0){ list.innerHTML='<div class="empty"><div style="font-size:44px;opacity:.2;margin-bottom:10px">🎬</div><div style="color:rgba(255,255,255,.35);font-size:13px;margin-bottom:14px">Koi video save nahi ki abhi tak.</div><button class="btn btn-p btn-sm" onclick="go(\'home\')">Pehla Video Dub Karo</button></div>'; return; }
+  list.innerHTML=my.map((v,i)=>`
+    <div class="vid-card">
+      <div class="vid-thumb" onclick="playD(${i})">
+        <video id="dv${i}" src="${v.videoUrl}"></video>
+        <div class="play-d" id="dpb${i}">▶</div>
+      </div>
+      <div class="vid-body">
+        <div class="vid-name">${v.title}</div>
+        <div style="display:flex;gap:8px;font-size:10px;color:rgba(255,255,255,.4);flex-wrap:wrap;margin-bottom:8px">
+          <span>${v.flag} ${v.lang}</span><span>💾 ${v.size}</span><span>📅 ${v.date}</span>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button class="btn btn-g btn-sm" onclick="playD(${i})">▶ Play</button>
+          <a class="btn btn-g btn-sm" href="${v.videoUrl}" download="dubbed.mp4">⬇ Download</a>
+          <button class="btn btn-g btn-sm" onclick="delVid('${v.id}')">🗑</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+function playD(i){ const vid=document.getElementById('dv'+i),btn=document.getElementById('dpb'+i); if(vid.style.display!=='block'){ vid.style.display='block'; btn.style.display='none'; vid.play().catch(()=>{}); } else { vid.style.display='none'; btn.style.display='flex'; vid.pause(); } }
+function delVid(id){ savedVids=savedVids.filter(v=>v.id!==id); renderDash(); toast('Video delete ho gaya',''); }
+
+function toast(msg,type){ const t=document.getElementById('toast'); t.textContent=msg; t.className='toast show'+(type==='ok'?' ok':type==='warn'?' warn':''); setTimeout(()=>t.className='toast',3000); }
+function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+</script>
+</body>
+</html>
