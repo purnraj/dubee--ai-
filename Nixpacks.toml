@@ -1,2 +1,9 @@
+
+[phases.setup]
+nixPkgs = ["nodejs_20", "npm-9_x", "ffmpeg"]
+
+[phases.build]
+cmds = ["npm install"]
+
 [start]
 cmd = "node index.js"
