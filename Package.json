@@ -1,6 +1,6 @@
 {
   "name": "dubee-ai",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Dubee.ai - AI Video Dubbing Platform",
   "main": "index.js",
   "scripts": {
