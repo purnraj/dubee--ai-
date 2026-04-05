@@ -18,7 +18,7 @@ app.use(cors());
 app.use(express.json());
 
 // ── Serve frontend files ──────────────────────────────────
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname, "../public")));
 
 // ── Serve output videos ───────────────────────────────────
 app.use("/outputs", express.static(path.join(__dirname, "outputs")));
