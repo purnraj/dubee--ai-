@@ -18,7 +18,7 @@ app.use(cors());
 app.use(express.json());
 
 // ── Serve frontend files ──────────────────────────────────
-app.use(express.static(path.join(__dirname, "../public")));
+app.use(express.static(path.join(__dirname, "public")));
 
 // ── Serve output videos ───────────────────────────────────
 app.use("/outputs", express.static(path.join(__dirname, "outputs")));
@@ -225,8 +225,7 @@ app.get("/api/health", (req, res) => {
 
 // ── Sabhi routes frontend ko bhejo ────────────────────────
 app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "../public", "index.html"));
-});
+  res.sendFile(path.join(__dirname, "public", "index.html"));
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, "0.0.0.0", () => {
