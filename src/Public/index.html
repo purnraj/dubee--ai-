@@ -489,6 +489,9 @@
 
   // ── On Load ──
   window.onload = () => {
+    currentUser = null;
+    authToken = null;
+    localStorage.removeItem("dubee_session");
     const saved = localStorage.getItem("dubee_session");
     if (saved) {
       const s = JSON.parse(saved);
