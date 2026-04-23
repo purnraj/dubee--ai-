@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Dubee.ai</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',sans-serif;background:#0a0a0f;color:#e0e0e0;min-height:100vh}
+nav{background:#0d0d1a;border-bottom:1px solid #1e1e3a;padding:12px 20px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.logo{font-size:22px;font-weight:800;color:#fff;margin-right:auto}
+.logo span{color:#6c63ff}
+nav button{background:#1a1a2e;border:1px solid #2e2e50;color:#ccc;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:14px}
+nav button.active,nav button:hover{background:#6c63ff;color:#fff;border-color:#6c63ff}
+.page{display:none;padding:20px;max-width:700px;margin:0 auto}
+.page.active{display:block}
+.card{background:#0d0d1a;border:1px solid #1e1e3a;border-radius:16px;padding:28px 24px;max-width:420px;margin:40px auto}
+.card h2{font-size:22px;margin-bottom:6px}
+.card p{color:#888;margin-bottom:20px;font-size:14px}
+input{width:100%;background:#1a1a2e;border:1px solid #2e2e50;color:#fff;padding:12px 16px;border-radius:10px;margin-bottom:14px;font-size:15px;outline:none}
+input:focus{border-color:#6c63ff}
+.btn{width:100%;background:linear-gradient(135deg,#6c63ff,#4ecdc4);border:none;color:#fff;padding:13px;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer;margin-top:4px}
+.btn:hover{opacity:0.9}
+.link-text{text-align:center;margin-top:16px;font-size:14px;color:#888}
+.link-text a{color:#6c63ff;cursor:pointer}
+.alert{padding:10px 14px;border-radius:8px;margin-bottom:12px;font-size:14px}
+.alert.err{background:#1a0a0a;border:1px solid #5a1e1e;color:#e74c3c}
+.alert.ok{background:#0a1a0a;border:1px solid #1e5a1e;color:#4ecdc4}
+.free-bar{background:#0d0d1a;border:1px solid #1e1e3a;border-radius:12px;padding:16px;margin-bottom:20px}
+.free-top{display:flex;justify-content:space-between;margin-bottom:8px}
+.free-top span{font-size:14px;color:#aaa}
+.free-top strong{color:#4ecdc4}
+.prog-bg{background:#1a1a2e;border-radius:999px;height:8px}
+.prog-fill{background:linear-gradient(90deg,#6c63ff,#4ecdc4);height:8px;border-radius:999px;transition:width 0.5s}
+.free-note{font-size:12px;color:#666;margin-top:6px}
+.dub-card{background:#0d0d1a;border:1px solid #1e1e3a;border-radius:16px;padding:24px}
+.dub-card h2{font-size:20px;margin-bottom:6px}
+.dub-card p{color:#777;font-size:13px;margin-bottom:20px}
+.upload-area{border:2px dashed #2e2e50;border-radius:12px;padding:28px;text-align:center;cursor:pointer;margin-bottom:16px}
+.upload-area:hover{border-color:#6c63ff}
+.or-div{text-align:center;color:#444;margin:12px 0;font-size:13px}
+.url-in{width:100%;background:#1a1a2e;border:1px solid #2e2e50;color:#fff;padding:12px 16px;border-radius:10px;font-size:14px;outline:none;margin-bottom:16px}
+.lang-sel{width:100%;background:#1a1a2e;border:1px solid #2e2e50;color:#fff;padding:12px 16px;border-radius:10px;font-size:14px;outline:none;margin-bottom:20px;cursor:pointer}
+.btn-dub{width:100%;background:linear-gradient(135deg,#6c63ff,#4ecdc4);border:none;color:#fff;padding:14px;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer}
+.loading{background:#0d0d1a;border:1px solid #1e1e3a;border-radius:16px;padding:40px 24px;text-align:center;margin-top:20px;display:none}
+.spinner{width:48px;height:48px;border:4px solid #1e1e3a;border-top-color:#6c63ff;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.error-box{background:#0d0d1a;border:1px solid #3a1e1e;border-radius:16px;padding:32px 24px;text-align:center;margin-top:20px;display:none}
+.error-box h3{color:#e74c3c;margin-bottom:8px}
+.error-box p{color:#888;font-size:14px;margin-bottom:20px}
+.result-box{background:#0d0d1a;border:1px solid #1e1e3a;border-radius:16px;padding:24px;margin-top:20px;display:none}
+.result-box h3{color:#4ecdc4;margin-bottom:16px}
+video{width:100%;border-radius:10px;margin-bottom:16px}
+.dl-btn{display:block;width:100%;background:#1a1a2e;border:1px solid #6c63ff;color:#6c63ff;padding:12px;border-radius:10px;text-align:center;text-decoration:none;font-weight:600;margin-bottom:16px}
+.txt-box{background:#1a1a2e;border-radius:10px;padding:14px;font-size:13px;color:#aaa;margin-bottom:10px;line-height:1.6}
+.txt-box strong{color:#6c63ff;display:block;margin-bottom:4px}
+.btn-back{background:#1a1a2e;border:1px solid #2e2e50;color:#ccc;padding:10px 24px;border-radius:10px;cursor:pointer;font-size:14px;width:100%;margin-top:8px}
+.saved-item{background:#0d0d1a;border:1px solid #1e1e3a;border-radius:14px;padding:16px;margin-bottom:14px}
+.saved-item video{width:100%;border-radius:8px;margin-bottom:12px}
+.saved-meta{display:flex;justify-content:space-between}
+.lang-badge{background:#1a1a2e;border:1px solid #6c63ff;color:#6c63ff;padding:3px 10px;border-radius:999px;font-size:12px}
+.date{color:#555;font-size:12px}
+.no-saved{text-align:center;color:#555;padding:60px 20px}
+.plan-card{background:#0d0d1a;border:1px solid #1e1e3a;border-radius:16px;padding:24px;margin-bottom:16px}
+.plan-card.featured{border-color:#6c63ff}
+.plan-card h3{font-size:20px;margin-bottom:4px}
+.plan-price{font-size:32px;font-weight:800;color:#6c63ff;margin:10px 0}
+.plan-price span{font-size:14px;color:#777;font-weight:400}
+.plan-card ul{list-style:none;margin:16px 0}
+.plan-card ul li{color:#aaa;font-size:14px;padding:5px 0}
+.plan-card ul li::before{content:"✅ "}
+.badge{background:#6c63ff;color:#fff;font-size:11px;padding:3px 8px;border-radius:999px;margin-left:8px}
+#logoutBtn{display:none}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">🎙 Dubee<span>.ai</span></div>
+  <button id="navDub">✨ Dub</button>
+  <button id="navSaved">📁 Saved</button>
+  <button id="navPlans">💎 Plans</button>
+  <button id="logoutBtn">Logout</button>
+</nav>
+
+<!-- LOGIN -->
+<div class="page active" id="page-login">
+  <div class="card">
+    <h2>Welcome Back 👋</h2>
+    <p>Login to continue dubbing videos</p>
+    <div id="loginAlert"></div>
+    <input type="email" id="loginEmail" placeholder="Email address"/>
+    <input type="password" id="loginPassword" placeholder="Password"/>
+    <button class="btn" id="loginBtn">Login</button>
+    <div class="link-text">Don't have an account? <a id="goSignup">Sign up free</a></div>
+  </div>
+</div>
+
+<!-- SIGNUP -->
+<div class="page" id="page-signup">
+  <div class="card">
+    <h2>Create Account 🚀</h2>
+    <p>Get 5 free video dubs — no credit card needed</p>
+    <div id="signupAlert"></div>
+    <input type="email" id="signupEmail" placeholder="Email address"/>
+    <input type="password" id="signupPassword" placeholder="Password (min 6 characters)"/>
+    <button class="btn" id="signupBtn">Create Free Account</button>
+    <div class="link-text">Already have an account? <a id="goLogin">Login</a></div>
+  </div>
+</div>
+
+<!-- DUB -->
+<div class="page" id="page-dub">
+  <div class="free-bar">
+    <div class="free-top">
+      <span>🎬 Free Videos</span>
+      <strong id="countDisplay">0 / 5</strong>
+    </div>
+    <div class="prog-bg"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+    <div class="free-note" id="freeNote">5 free videos remaining</div>
+  </div>
+  <div class="dub-card" id="dubForm">
+    <h2>🎙 Dub Your Video</h2>
+    <p>Whisper + LLaMA + ElevenLabs</p>
+    <div class="upload-area" id="uploadArea">
+      <input type="file" id="fileInput" accept="video/*" style="display:none"/>
+      <div style="font-size:36px;margin-bottom:8px">📹</div>
+      <p style="color:#888;font-size:14px">Tap to upload video</p>
+      <div style="color:#4ecdc4;font-size:13px;margin-top:6px" id="fileName"></div>
+    </div>
+    <div class="or-div">— OR paste video URL —</div>
+    <input type="url" class="url-in" id="videoUrl" placeholder="https://example.com/video.mp4"/>
+    <select class="lang-sel" id="langSelect">
+      <option value="Hindi">🇮🇳 Hindi</option>
+      <option value="English">🇬🇧 English</option>
+      <option value="Spanish">🇪🇸 Spanish</option>
+      <option value="French">🇫🇷 French</option>
+      <option value="German">🇩🇪 German</option>
+      <option value="Portuguese">🇧🇷 Portuguese</option>
+      <option value="Italian">🇮🇹 Italian</option>
+      <option value="Russian">🇷🇺 Russian</option>
+      <option value="Japanese">🇯🇵 Japanese</option>
+      <option value="Chinese">🇨🇳 Chinese</option>
+      <option value="Korean">🇰🇷 Korean</option>
+      <option value="Arabic">🇸🇦 Arabic</option>
+    </select>
+    <button class="btn-dub" id="dubBtn">🚀 Start Dubbing</button>
+  </div>
+  <div class="loading" id="dubLoading">
+    <div class="spinner"></div>
+    <h3 style="margin-bottom:8px">Processing your video...</h3>
+    <p id="loadStep">Transcribing audio with Whisper...</p>
+  </div>
+  <div class="error-box" id="dubError">
+    <h3>Something went wrong!</h3>
+    <p id="errMsg"></p>
+    <button class="btn-back" id="backBtn">← Go Back</button>
+  </div>
+  <div class="result-box" id="dubResult">
+    <h3>✅ Dubbing Complete!</h3>
+    <video id="resultVideo" controls></video>
+    <a id="dlBtn" class="dl-btn" download>⬇ Download Video</a>
+    <div class="txt-box"><strong>Original Text:</strong><span id="origText"></span></div>
+    <div class="txt-box"><strong>Translated Text:</strong><span id="transText"></span></div>
+    <button class="btn-back" id="dubAgainBtn">🎬 Dub Another Video</button>
+  </div>
+</div>
+
+<!-- SAVED -->
+<div class="page" id="page-saved">
+  <h2 style="margin-bottom:6px">📁 Saved Videos</h2>
+  <p style="color:#777;font-size:13px;margin-bottom:20px">All your dubbed videos</p>
+  <div id="savedList"><div class="no-saved"><p>No saved videos yet</p></div></div>
+</div>
+
+<!-- PLANS -->
+<div class="page" id="page-plans">
+  <div style="text-align:center;margin-bottom:30px">
+    <h2 style="font-size:26px">💎 Upgrade Your Plan</h2>
+    <p style="color:#777;font-size:14px;margin-top:6px">Get unlimited dubbing power</p>
+  </div>
+  <div class="plan-card">
+    <h3>Free</h3>
+    <div class="plan-price">₹0 <span>/ forever</span></div>
+    <ul><li>5 free video dubs</li><li>All languages supported</li><li>HD quality output</li></ul>
+  </div>
+  <div class="plan-card featured">
+    <h3>Pro Monthly <span class="badge">POPULAR</span></h3>
+    <div class="plan-price">₹299 <span>/ month</span></div>
+    <ul><li>Unlimited video dubs</li><li>All languages supported</li><li>Priority processing</li><li>HD quality output</li><li>Saved video history</li></ul>
+    <button class="btn">Get Pro — ₹299/mo</button>
+  </div>
+  <div class="plan-card">
+    <h3>Pro Yearly <span class="badge">SAVE 33%</span></h3>
+    <div class="plan-price">₹199 <span>/ month</span></div>
+    <ul><li>Unlimited video dubs</li><li>All languages supported</li><li>Priority processing</li><li>HD quality output</li><li>Saved video history</li></ul>
+    <button class="btn">Get Pro — ₹199/mo</button>
+  </div>
+</div>
+
+<script>
+var user = null;
+var token = null;
+
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active')});
+  document.getElementById('page-'+name).classList.add('active');
+  if(name==='saved') loadSaved();
+}
+
+function showLoggedIn() {
+  document.getElementById('logoutBtn').style.display='inline-block';
+}
+
+function showLoggedOut() {
+  document.getElementById('logoutBtn').style.display='none';
+}
+
+window.addEventListener('load', function() {
+  var s = localStorage.getItem('dubee_session');
+  if(s) {
+    var d = JSON.parse(s);
+    user = d.user;
+    token = d.token;
+    showLoggedIn();
+    showPage('dub');
+    loadCount();
+  } else {
+    showPage('login');
+  }
+});
+
+document.getElementById('navDub').addEventListener('click', function(){ showPage('dub'); });
+document.getElementById('navSaved').addEventListener('click', function(){ showPage('saved'); });
+document.getElementById('navPlans').addEventListener('click', function(){ showPage('plans'); });
+document.getElementById('logoutBtn').addEventListener('click', function(){
+  user=null; token=null;
+  localStorage.removeItem('dubee_session');
+  showLoggedOut();
+  showPage('login');
+});
+document.getElementById('goSignup').addEventListener('click', function(){ showPage('signup'); });
+document.getElementById('goLogin').addEventListener('click', function(){ showPage('login'); });
+
+document.getElementById('loginBtn').addEventListener('click', async function(){
+  var email = document.getElementById('loginEmail').value.trim();
+  var pass = document.getElementById('loginPassword').value;
+  var alertEl = document.getElementById('loginAlert');
+  if(!email||!pass){alertEl.innerHTML='<div class="alert err">Please enter email and password</div>';return;}
+  try {
+    var res = await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email,password:pass})});
+    var data = await res.json();
+    if(!res.ok) throw new Error(data.error);
+    user=data.user; token=data.session.access_token;
+    localStorage.setItem('dubee_session',JSON.stringify({user:user,token:token}));
+    showLoggedIn(); showPage('dub'); loadCount();
+  } catch(e){alertEl.innerHTML='<div class="alert err">'+e.message+'</div>';}
+});
+
+document.getElementById('signupBtn').addEventListener('click', async function(){
+  var email = document.getElementById('signupEmail').value.trim();
+  var pass = document.getElementById('signupPassword').value;
+  var alertEl = document.getElementById('signupAlert');
+  if(!email||!pass){alertEl.innerHTML='<div class="alert err">Please enter email and password</div>';return;}
+  try {
+    var res = await fetch('/api/signup',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email,password:pass})});
+    var data = await res.json();
+    if(!res.ok) throw new Error(data.error);
+    alertEl.innerHTML='<div class="alert ok">Account created! Please login.</div>';
+    setTimeout(function(){showPage('login');},1500);
+  } catch(e){alertEl.innerHTML='<div class="alert err">'+e.message+'</div>';}
+});
+
+document.getElementById('uploadArea').addEventListener('click', function(){
+  document.getElementById('fileInput').click();
+});
+
+document.getElementById('fileInput').addEventListener('change', function(){
+  if(this.files[0]){
+    document.getElementById('fileName').textContent='📎 '+this.files[0].name;
+    document.getElementById('videoUrl').value='';
+  }
+});
+
+document.getElementById('dubBtn').addEventListener('click', async function(){
+  if(!token){showPage('login');return;}
+  var file = document.getElementById('fileInput').files[0];
+  var url = document.getElementById('videoUrl').value.trim();
+  var lang = document.getElementById('langSelect').value;
+  if(!file&&!url){alert('Please upload a video or paste a URL');return;}
+  document.getElementById('dubForm').style.display='none';
+  document.getElementById('dubLoading').style.display='block';
+  document.getElementById('dubError').style.display='none';
+  document.getElementById('dubResult').style.display='none';
+  var steps=['Transcribing audio with Whisper...','Translating with LLaMA AI...','Generating dubbed audio with ElevenLabs...','Merging video and audio...','Almost done...'];
+  var si=0;
+  var interval=setInterval(function(){document.getElementById('loadStep').textContent=steps[si%steps.length];si++;},4000);
+  try {
+    var fd=new FormData();
+    if(file) fd.append('video',file);
+    else fd.append('videoUrl',url);
+    fd.append('language',lang);
+    var res=await fetch('/api/dub',{method:'POST',headers:{Authorization:'Bearer '+token},body:fd});
+    var data=await res.json();
+    clearInterval(interval);
+    if(!res.ok) throw new Error(data.error);
+    document.getElementById('dubLoading').style.display='none';
+    document.getElementById('dubResult').style.display='block';
+    document.getElementById('resultVideo').src=data.videoUrl;
+    document.getElementById('dlBtn').href=data.videoUrl;
+    document.getElementById('origText').textContent=data.originalText||'';
+    document.getElementById('transText').textContent=data.translatedText||'';
+    loadCount();
+  } catch(e){
+    clearInterval(interval);
+    document.getElementById('dubLoading').style.display='none';
+    document.getElementById('dubError').style.display='block';
+    document.getElementById('errMsg').textContent=e.message;
+  }
+});
+
+document.getElementById('backBtn').addEventListener('click', function(){
+  document.getElementById('dubForm').style.display='block';
+  document.getElementById('dubError').style.display='none';
+});
+
+document.getElementById('dubAgainBtn').addEventListener('click', function(){
+  document.getElementById('dubForm').style.display='block';
+  document.getElementById('dubResult').style.display='none';
+  document.getElementById('fileInput').value='';
+  document.getElementById('fileName').textContent='';
+  document.getElementById('videoUrl').value='';
+});
+
+async function loadCount(){
+  try {
+    var res=await fetch('/api/video-count',{headers:{Authorization:'Bearer '+token}});
+    var data=await res.json();
+    var used=data.count||0;
+    var rem=data.remaining||0;
+    document.getElementById('countDisplay').textContent=used+' / 5';
+    document.getElementById('progFill').style.width=((used/5)*100)+'%';
+    document.getElementById('freeNote').textContent=rem>0?rem+' free video'+(rem>1?'s':'')+' remaining':'Free limit reached — upgrade to continue';
+  } catch(e){}
+}
+
+async function loadSaved(){
+  if(!token) return;
+  try {
+    var res=await fetch('/api/saved-videos',{headers:{Authorization:'Bearer '+token}});
+    var data=await res.json();
+    var list=document.getElementById('savedList');
+    if(!data.videos||data.videos.length===0){list.innerHTML='<div class="no-saved"><p>No saved videos yet</p></div>';return;}
+    list.innerHTML=data.videos.map(function(v){return '<div class="saved-item"><video src="'+v.video_url+'" controls></video><div class="saved-meta"><span class="lang-badge">'+v.language+'</span><span class="date">'+new Date(v.created_at).toLocaleDateString()+'</span></div></div>';}).join('');
+  } catch(e){}
+}
+</script>
+</body>
+</html>
+
