@@ -98,7 +98,7 @@ app.get("/api/saved-videos", async (req, res) => {
   if (!token) return res.status(401).json({ error: "Not logged in" });
 
   const { data: userData, error: authError } = await supabase.auth.getUser(token);
-  if (authError) return res.status(401).json({ error: "Invalid session" });
+  if (authError || !userData?.user) return res.status(401).json({ error: "Invalid session" });
 
   const { data, error } = await supabase
     .from("videos")
@@ -116,7 +116,7 @@ app.get("/api/video-count", async (req, res) => {
   if (!token) return res.status(401).json({ error: "Not logged in" });
 
   const { data: userData, error: authError } = await supabase.auth.getUser(token);
-  if (authError) return res.status(401).json({ error: "Invalid session" });
+  if (authError || !userData?.user) return res.status(401).json({ error: "Invalid session" });
 
   const { count, error } = await supabase
     .from("videos")
@@ -143,7 +143,7 @@ app.post("/api/dub", upload.single("video"), async (req, res) => {
     if (!token) throw new Error("Please login first");
 
     const { data: userData, error: authError } = await supabase.auth.getUser(token);
-    if (authError) throw new Error("Invalid session, please login again");
+    if (authError || !userData?.user) throw new Error("Invalid session, please login again");
 
     const userId = userData.user.id;
 
