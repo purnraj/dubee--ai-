@@ -13,7 +13,7 @@ app.use(cors());
 app.use(express.json());
 
 // Static files
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname, "Public")));
 app.use("/outputs", express.static(path.join(__dirname, "outputs")));
 
 // Create folders
