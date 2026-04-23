@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dubee.ai — AI Video Dubbing</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #0a0a0f;
+      color: #e0e0e0;
+      min-height: 100vh;
+    }
+
+    /* ── NAV ── */
+    nav {
+      background: #0d0d1a;
+      border-bottom: 1px solid #1e1e3a;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .logo { font-size: 22px; font-weight: 800; color: #fff; margin-right: auto; }
+    .logo span { color: #6c63ff; }
+    nav button {
+      background: #1a1a2e;
+      border: 1px solid #2e2e50;
+      color: #ccc;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+    nav button:hover, nav button.active {
+      background: #6c63ff;
+      color: #fff;
+      border-color: #6c63ff;
+    }
+    #logoutBtn { display: none; }
+
+    /* ── PAGES ── */
+    .page { display: none; padding: 20px; max-width: 700px; margin: 0 auto; }
+    .page.active { display: block; }
+
+    /* ── AUTH CARD ── */
+    .auth-card {
+      background: #0d0d1a;
+      border: 1px solid #1e1e3a;
+      border-radius: 16px;
+      padding: 32px 24px;
+      max-width: 420px;
+      margin: 40px auto;
+    }
+    .auth-card h2 { font-size: 24px; margin-bottom: 6px; }
+    .auth-card p { color: #888; margin-bottom: 24px; font-size: 14px; }
+    .auth-card input {
+      width: 100%;
+      background: #1a1a2e;
+      border: 1px solid #2e2e50;
+      color: #fff;
+      padding: 12px 16px;
+      border-radius: 10px;
+      margin-bottom: 14px;
+      font-size: 15px;
+      outline: none;
+    }
+    .auth-card input:focus { border-color: #6c63ff; }
+    .btn-primary {
+      width: 100%;
+      background: linear-gradient(135deg, #6c63ff, #4ecdc4);
+      border: none;
+      color: #fff;
+      padding: 13px;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 4px;
+    }
+    .btn-primary:hover { opacity: 0.9; }
+    .switch-link {
+      text-align: center;
+      margin-top: 18px;
+      font-size: 14px;
+      color: #888;
+    }
+    .switch-link a { color: #6c63ff; cursor: pointer; text-decoration: none; }
+
+    /* ── DUB PAGE ── */
+    .free-bar {
+      background: #0d0d1a;
+      border: 1px solid #1e1e3a;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+    .free-bar-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .free-bar-top span { font-size: 14px; color: #aaa; }
+    .free-bar-top strong { color: #4ecdc4; font-size: 16px; }
+    .progress-bg { background: #1a1a2e; border-radius: 999px; height: 8px; }
+    .progress-fill { background: linear-gradient(90deg, #6c63ff, #4ecdc4); height: 8px; border-radius: 999px; transition: width 0.5s; }
+    .free-bar-note { font-size: 12px; color: #666; margin-top: 6px; }
+
+    .dub-card {
+      background: #0d0d1a;
+      border: 1px solid #1e1e3a;
+      border-radius: 16px;
+      padding: 24px;
+    }
+    .dub-card h2 { font-size: 20px; margin-bottom: 6px; }
+    .dub-card p { color: #777; font-size: 13px; margin-bottom: 20px; }
+
+    .upload-area {
+      border: 2px dashed #2e2e50;
+      border-radius: 12px;
+      padding: 28px;
+      text-align: center;
+      cursor: pointer;
+      margin-bottom: 16px;
+      transition: border-color 0.2s;
+    }
+    .upload-area:hover { border-color: #6c63ff; }
+    .upload-area input { display: none; }
+    .upload-area .icon { font-size: 36px; margin-bottom: 8px; }
+    .upload-area p { color: #888; font-size: 14px; margin: 0; }
+    .upload-area .filename { color: #4ecdc4; font-size: 13px; margin-top: 6px; }
+
+    .or-divider { text-align: center; color: #444; margin: 12px 0; font-size: 13px; }
+
+    .url-input {
+      width: 100%;
+      background: #1a1a2e;
+      border: 1px solid #2e2e50;
+      color: #fff;
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 14px;
+      outline: none;
+      margin-bottom: 16px;
+    }
+    .url-input:focus { border-color: #6c63ff; }
+
+    .lang-select {
+      width: 100%;
+      background: #1a1a2e;
+      border: 1px solid #2e2e50;
+      color: #fff;
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 14px;
+      outline: none;
+      margin-bottom: 20px;
+      cursor: pointer;
+    }
+
+    .btn-dub {
+      width: 100%;
+      background: linear-gradient(135deg, #6c63ff, #4ecdc4);
+      border: none;
+      color: #fff;
+      padding: 14px;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .btn-dub:hover { opacity: 0.9; }
+    .btn-dub:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* ── RESULT ── */
+    .result-card {
+      background: #0d0d1a;
+      border: 1px solid #1e1e3a;
+      border-radius: 16px;
+      padding: 24px;
+      margin-top: 20px;
+    }
+    .result-card h3 { margin-bottom: 16px; color: #4ecdc4; }
+    video { width: 100%; border-radius: 10px; margin-bottom: 16px; }
+    .btn-download {
+      display: block;
+      width: 100%;
+      background: #1a1a2e;
+      border: 1px solid #6c63ff;
+      color: #6c63ff;
+      padding: 12px;
+      border-radius: 10px;
+      text-align: center;
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+    .text-box {
+      background: #1a1a2e;
+      border-radius: 10px;
+      padding: 14px;
+      font-size: 13px;
+      color: #aaa;
+      margin-bottom: 10px;
+      line-height: 1.6;
+    }
+    .text-box strong { color: #6c63ff; display: block; margin-bottom: 4px; }
+
+    /* ── LOADING ── */
+    .loading-card {
+      background: #0d0d1a;
+      border: 1px solid #1e1e3a;
+      border-radius: 16px;
+      padding: 40px 24px;
+      text-align: center;
+      margin-top: 20px;
+    }
+    .spinner {
+      width: 48px; height: 48px;
+      border: 4px solid #1e1e3a;
+      border-top-color: #6c63ff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-card p { color: #888; font-size: 14px; }
+
+    /* ── ERROR ── */
+    .error-card {
+      background: #0d0d1a;
+      border: 1px solid #3a1e1e;
+      border-radius: 16px;
+      padding: 32px 24px;
+      text-align: center;
+      margin-top: 20px;
+    }
+    .error-card .x { font-size: 48px; color: #e74c3c; margin-bottom: 12px; }
+    .error-card h3 { color: #e74c3c; margin-bottom: 8px; }
+    .error-card p { color: #888; font-size: 14px; margin-bottom: 20px; }
+    .btn-back {
+      background: #1a1a2e;
+      border: 1px solid #2e2e50;
+      color: #ccc;
+      padding: 10px 24px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    /* ── SAVED VIDEOS ── */
+    .saved-header { margin-bottom: 20px; }
+    .saved-header h2 { font-size: 22px; }
+    .saved-header p { color: #777; font-size: 13px; }
+    .video-item {
+      background: #0d0d1a;
+      border: 1px solid #1e1e3a;
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+    .video-item video { width: 100%; border-radius: 8px; margin-bottom: 12px; }
+    .video-meta { display: flex; justify-content: space-between; align-items: center; }
+    .video-meta .lang-badge {
+      background: #1a1a2e;
+      border: 1px solid #6c63ff;
+      color: #6c63ff;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+    }
+    .video-meta .date { color: #555; font-size: 12px; }
+    .no-videos { text-align: center; color: #555; padding: 60px 20px; }
+    .no-videos .icon { font-size: 48px; margin-bottom: 12px; }
+
+    /* ── PLANS ── */
+    .plans-header { text-align: center; margin-bottom: 30px; }
+    .plans-header h2 { font-size: 26px; }
+    .plans-header p { color: #777; font-size: 14px; margin-top: 6px; }
+    .plan-card {
+      background: #0d0d1a;
+      border: 1px solid #1e1e3a;
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+    .plan-card.featured { border-color: #6c63ff; }
+    .plan-card h3 { font-size: 20px; margin-bottom: 4px; }
+    .plan-card .price { font-size: 32px; font-weight: 800; color: #6c63ff; margin: 10px 0; }
+    .plan-card .price span { font-size: 14px; color: #777; font-weight: 400; }
+    .plan-card ul { list-style: none; margin: 16px 0; }
+    .plan-card ul li { color: #aaa; font-size: 14px; padding: 5px 0; }
+    .plan-card ul li::before { content: "✅ "; }
+    .badge { background: #6c63ff; color: #fff; font-size: 11px; padding: 3px 8px; border-radius: 999px; margin-left: 8px; }
+
+    /* ── ALERT ── */
+    .alert {
+      padding: 12px 16px;
+      border-radius: 10px;
+      margin-bottom: 16px;
+      font-size: 14px;
+    }
+    .alert.error { background: #1a0a0a; border: 1px solid #5a1e1e; color: #e74c3c; }
+    .alert.success { background: #0a1a0a; border: 1px solid #1e5a1e; color: #4ecdc4; }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">🎙 Dubee<span>.ai</span></div>
+  <button onclick="showPage('dub')" id="navDub" class="active">✨ Dub</button>
+  <button onclick="showPage('saved')" id="navSaved">📁 Saved</button>
+  <button onclick="showPage('plans')" id="navPlans">💎 Plans</button>
+  <button id="logoutBtn" onclick="logout()">Logout</button>
+</nav>
+
+<!-- ── LOGIN PAGE ── -->
+<div class="page active" id="page-login">
+  <div class="auth-card">
+    <h2>Welcome Back 👋</h2>
+    <p>Login to continue dubbing videos</p>
+    <div id="loginAlert"></div>
+    <input type="email" id="loginEmail" placeholder="Email address" />
+    <input type="password" id="loginPassword" placeholder="Password" />
+    <button class="btn-primary" onclick="login()">Login</button>
+    <div class="switch-link">
+      Don't have an account? <a onclick="showPage('signup')">Sign up free</a>
+    </div>
+  </div>
+</div>
+
+<!-- ── SIGNUP PAGE ── -->
+<div class="page" id="page-signup">
+  <div class="auth-card">
+    <h2>Create Account 🚀</h2>
+    <p>Get 5 free video dubs — no credit card needed</p>
+    <div id="signupAlert"></div>
+    <input type="email" id="signupEmail" placeholder="Email address" />
+    <input type="password" id="signupPassword" placeholder="Password (min 6 characters)" />
+    <button class="btn-primary" onclick="signup()">Create Free Account</button>
+    <div class="switch-link">
+      Already have an account? <a onclick="showPage('login')">Login</a>
+    </div>
+  </div>
+</div>
+
+<!-- ── DUB PAGE ── -->
+<div class="page" id="page-dub">
+  <!-- Free Videos Bar -->
+  <div class="free-bar">
+    <div class="free-bar-top">
+      <span>🎬 Free Videos</span>
+      <strong id="videoCountDisplay">0 / 5</strong>
+    </div>
+    <div class="progress-bg">
+      <div class="progress-fill" id="progressFill" style="width:0%"></div>
+    </div>
+    <div class="free-bar-note" id="freeNote">5 free videos remaining</div>
+  </div>
+
+  <!-- Dub Form -->
+  <div class="dub-card" id="dubForm">
+    <h2>🎙 Dub Your Video</h2>
+    <p>Whisper + LLaMA + ElevenLabs</p>
+
+    <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+      <input type="file" id="fileInput" accept="video/*" onchange="fileSelected(this)" />
+      <div class="icon">📹</div>
+      <p>Tap to upload video</p>
+      <div class="filename" id="fileName"></div>
+    </div>
+
+    <div class="or-divider">— OR paste video URL —</div>
+
+    <input type="url" class="url-input" id="videoUrl" placeholder="https://example.com/video.mp4" />
+
+    <select class="lang-select" id="langSelect">
+      <option value="Hindi">🇮🇳 Hindi</option>
+      <option value="English">🇬🇧 English</option>
+      <option value="Spanish">🇪🇸 Spanish</option>
+      <option value="French">🇫🇷 French</option>
+      <option value="German">🇩🇪 German</option>
+      <option value="Portuguese">🇧🇷 Portuguese</option>
+      <option value="Italian">🇮🇹 Italian</option>
+      <option value="Russian">🇷🇺 Russian</option>
+      <option value="Japanese">🇯🇵 Japanese</option>
+      <option value="Chinese">🇨🇳 Chinese</option>
+      <option value="Korean">🇰🇷 Korean</option>
+      <option value="Arabic">🇸🇦 Arabic</option>
+    </select>
+
+    <button class="btn-dub" onclick="startDub()">🚀 Start Dubbing</button>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-card" id="dubLoading" style="display:none">
+    <div class="spinner"></div>
+    <h3 style="margin-bottom:8px">Processing your video...</h3>
+    <p id="loadingStep">Transcribing audio with Whisper...</p>
+  </div>
+
+  <!-- Error -->
+  <div class="error-card" id="dubError" style="display:none">
+    <div class="x">✗</div>
+    <h3>Something went wrong!</h3>
+    <p id="errorMsg"></p>
+    <button class="btn-back" onclick="resetDub()">← Go Back</button>
+  </div>
+
+  <!-- Result -->
+  <div class="result-card" id="dubResult" style="display:none">
+    <h3>✅ Dubbing Complete!</h3>
+    <video id="resultVideo" controls></video>
+    <a id="downloadBtn" class="btn-download" download>⬇ Download Video</a>
+    <div class="text-box">
+      <strong>Original Text:</strong>
+      <span id="originalText"></span>
+    </div>
+    <div class="text-box">
+      <strong>Translated Text:</strong>
+      <span id="translatedText"></span>
+    </div>
+    <button class="btn-back" style="width:100%;margin-top:8px" onclick="resetDub()">🎬 Dub Another Video</button>
+  </div>
+</div>
+
+<!-- ── SAVED PAGE ── -->
+<div class="page" id="page-saved">
+  <div class="saved-header">
+    <h2>📁 Saved Videos</h2>
+    <p>All your dubbed videos</p>
+  </div>
+  <div id="savedList">
+    <div class="no-videos">
+      <div class="icon">🎬</div>
+      <p>No saved videos yet</p>
+    </div>
+  </div>
+</div>
+
+<!-- ── PLANS PAGE ── -->
+<div class="page" id="page-plans">
+  <div class="plans-header">
+    <h2>💎 Upgrade Your Plan</h2>
+    <p>Get unlimited dubbing power</p>
+  </div>
+
+  <div class="plan-card">
+    <h3>Free</h3>
+    <div class="price">₹0 <span>/ forever</span></div>
+    <ul>
+      <li>5 free video dubs</li>
+      <li>All languages supported</li>
+      <li>HD quality output</li>
+    </ul>
+  </div>
+
+  <div class="plan-card featured">
+    <h3>Pro Monthly <span class="badge">POPULAR</span></h3>
+    <div class="price">₹299 <span>/ month</span></div>
+    <ul>
+      <li>Unlimited video dubs</li>
+      <li>All languages supported</li>
+      <li>Priority processing</li>
+      <li>HD quality output</li>
+      <li>Saved video history</li>
+    </ul>
+    <button class="btn-primary">Get Pro — ₹299/mo</button>
+  </div>
+
+  <div class="plan-card">
+    <h3>Pro Yearly <span class="badge">SAVE 33%</span></h3>
+    <div class="price">₹199 <span>/ month</span></div>
+    <ul>
+      <li>Unlimited video dubs</li>
+      <li>All languages supported</li>
+      <li>Priority processing</li>
+      <li>HD quality output</li>
+      <li>Saved video history</li>
+    </ul>
+    <button class="btn-primary">Get Pro — ₹199/mo</button>
+  </div>
+</div>
+
+<script>
+  // ── State ──
+  let currentUser = null;
+  let authToken = null;
+
+  // ── On Load ──
+  window.onload = () => {
+    const saved = localStorage.getItem("dubee_session");
+    if (saved) {
+      const s = JSON.parse(saved);
+      currentUser = s.user;
+      authToken = s.token;
+      showLoggedInUI();
+      showPage("dub");
+      loadVideoCount();
+    } else {
+      showPage("login");
+    }
+  };
+
+  // ── Pages ──
+  function showPage(name) {
+    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+    document.querySelectorAll("nav button").forEach(b => b.classList.remove("active"));
+    document.getElementById("page-" + name).classList.add("active");
+    const navBtn = document.getElementById("nav" + name.charAt(0).toUpperCase() + name.slice(1));
+    if (navBtn) navBtn.classList.add("active");
+    if (name === "saved") loadSavedVideos();
+  }
+
+  function showLoggedInUI() {
+    document.getElementById("logoutBtn").style.display = "inline-block";
+    document.getElementById("navDub").style.display = "inline-block";
+    document.getElementById("navSaved").style.display = "inline-block";
+    document.getElementById("navPlans").style.display = "inline-block";
+  }
+
+  function showLoggedOutUI() {
+    document.getElementById("logoutBtn").style.display = "none";
+  }
+
+  // ── Auth ──
+  async function signup() {
+    const email = document.getElementById("signupEmail").value.trim();
+    const password = document.getElementById("signupPassword").value;
+    const alertEl = document.getElementById("signupAlert");
+
+    if (!email || !password) {
+      alertEl.innerHTML = '<div class="alert error">Please enter email and password</div>';
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      alertEl.innerHTML = '<div class="alert success">Account created! Please login.</div>';
+      setTimeout(() => showPage("login"), 1500);
+    } catch (e) {
+      alertEl.innerHTML = `<div class="alert error">${e.message}</div>`;
+    }
+  }
+
+  async function login() {
+    const email = document.getElementById("loginEmail").value.trim();
+    const password = document.getElementById("loginPassword").value;
+    const alertEl = document.getElementById("loginAlert");
+
+    if (!email || !password) {
+      alertEl.innerHTML = '<div class="alert error">Please enter email and password</div>';
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      currentUser = data.user;
+      authToken = data.session.access_token;
+      localStorage.setItem("dubee_session", JSON.stringify({ user: currentUser, token: authToken }));
+
+      showLoggedInUI();
+      showPage("dub");
+      loadVideoCount();
+    } catch (e) {
+      alertEl.innerHTML = `<div class="alert error">${e.message}</div>`;
+    }
+  }
+
+  function logout() {
+    currentUser = null;
+    authToken = null;
+    localStorage.removeItem("dubee_session");
+    showLoggedOutUI();
+    showPage("login");
+  }
+
+  // ── Video Count ──
+  async function loadVideoCount() {
+    try {
+      const res = await fetch("/api/video-count", {
+        headers: { Authorization: "Bearer " + authToken },
+      });
+      const data = await res.json();
+      const used = data.count || 0;
+      const remaining = data.remaining || 0;
+      document.getElementById("videoCountDisplay").textContent = `${used} / 5`;
+      document.getElementById("progressFill").style.width = `${(used / 5) * 100}%`;
+      document.getElementById("freeNote").textContent =
+        remaining > 0 ? `${remaining} free video${remaining > 1 ? "s" : ""} remaining` : "Free limit reached — upgrade to continue";
+    } catch {}
+  }
+
+  // ── File Select ──
+  function fileSelected(input) {
+    if (input.files[0]) {
+      document.getElementById("fileName").textContent = "📎 " + input.files[0].name;
+      document.getElementById("videoUrl").value = "";
+    }
+  }
+
+  // ── Dub ──
+  async function startDub() {
+    if (!authToken) { showPage("login"); return; }
+
+    const file = document.getElementById("fileInput").files[0];
+    const url = document.getElementById("videoUrl").value.trim();
+    const lang = document.getElementById("langSelect").value;
+
+    if (!file && !url) {
+      alert("Please upload a video or paste a URL");
+      return;
+    }
+
+    document.getElementById("dubForm").style.display = "none";
+    document.getElementById("dubLoading").style.display = "block";
+    document.getElementById("dubError").style.display = "none";
+    document.getElementById("dubResult").style.display = "none";
+
+    cons
