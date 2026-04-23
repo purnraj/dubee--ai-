@@ -32,7 +32,14 @@ const groq = new Groq({ apiKey: GROQ_API_KEY });
 
 // Init Supabase (admin)
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
+async function getUserFromToken(token) {
+  const { data, error } = await supabase.auth.getUser(token);
+  if (error || !data?.user) {
+    const { data: data2 } = await supabase.auth.setSession({ access_token: token, refresh_token: token });
+    return data2?.user || null;
+  }
+  return data.user;
+}
 // Multer upload
 const upload = multer({
   dest: "uploads/",
@@ -97,8 +104,9 @@ app.get("/api/saved-videos", async (req, res) => {
   const token = req.headers.authorization?.split(" ")[1];
   if (!token) return res.status(401).json({ error: "Not logged in" });
 
-  const { data: userData, error: authError } = await supabase.auth.getUser(token);
-  if (authError || !userData?.user) return res.status(401).json({ error: "Invalid session" });
+  const userObj = await getUserFromToken(token);
+if (!userObj) ...return res.status(401).json({ error: "Invalid session" });
+  
 
   const { data, error } = await supabase
     .from("videos")
@@ -113,10 +121,8 @@ app.get("/api/saved-videos", async (req, res) => {
 // ─── CHECK VIDEO COUNT ────────────────────────────────────
 app.get("/api/video-count", async (req, res) => {
   const token = req.headers.authorization?.split(" ")[1];
-  if (!token) return res.status(401).json({ error: "Not logged in" });
-
-  const { data: userData, error: authError } = await supabase.auth.getUser(token);
-  if (authError || !userData?.user) return res.status(401).json({ error: "Invalid session" });
+  const userObj = await getUserFromToken(token);
+if (!userObj) ... return res.status(401).json({ error: "Invalid session" });
 
   const { count, error } = await supabase
     .from("videos")
@@ -142,8 +148,8 @@ app.post("/api/dub", upload.single("video"), async (req, res) => {
     const token = req.headers.authorization?.split(" ")[1];
     if (!token) throw new Error("Please login first");
 
-    const { data: userData, error: authError } = await supabase.auth.getUser(token);
-    if (authError || !userData?.user) throw new Error("Invalid session, please login again");
+   const userObj = await getUserFromToken(token);
+if (!userObj) ...  throw new Error("Invalid session, please login again");
 
     const userId = userData.user.id;
 
