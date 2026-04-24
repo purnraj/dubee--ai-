@@ -105,7 +105,7 @@ app.get("/api/saved-videos", async (req, res) => {
   if (!token) return res.status(401).json({ error: "Not logged in" });
 
   const userObj = await getUserFromToken(token);
-if (!userObj) ...return res.status(401).json({ error: "Invalid session" });
+if (!userObj) return res.status(401).json({ error: "Invalid session" });
   
 
   const { data, error } = await supabase
@@ -122,7 +122,7 @@ if (!userObj) ...return res.status(401).json({ error: "Invalid session" });
 app.get("/api/video-count", async (req, res) => {
   const token = req.headers.authorization?.split(" ")[1];
   const userObj = await getUserFromToken(token);
-if (!userObj) ... return res.status(401).json({ error: "Invalid session" });
+if (!userObj) return res.status(401).json({ error: "Invalid session" });
 
   const { count, error } = await supabase
     .from("videos")
@@ -141,15 +141,14 @@ app.post("/api/dub", upload.single("video"), async (req, res) => {
   const cleanup = [];
 
   try {
-    if (!GROQ_API_KEY) throw new Error("GROQ_API_KEY missing!");
-    if (!ELEVEN_KEY) throw new Error("ELEVENLABS_API_KEY missing!");
+    if (!ELEVENLABS_API_KEY) throw new Error("ELEVENLABS_API_KEY missing!");
 
     // ── Auth check ──
     const token = req.headers.authorization?.split(" ")[1];
     if (!token) throw new Error("Please login first");
 
    const userObj = await getUserFromToken(token);
-if (!userObj) ...  throw new Error("Invalid session, please login again");
+if (!userObj) throw new Error("Invalid session, please login again");
 
     const userId = userData.user.id;
 
