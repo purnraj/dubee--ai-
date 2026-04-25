@@ -23,7 +23,7 @@ app.use("/outputs", express.static(path.join(__dirname, "outputs")));
 
 // API Keys from environment
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
-const ELEVEN_KEY = process.env.ELEVENLABS_API_KEY;
+const ELEVEN_KEY = process.env.ELEVEN_KEY;
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
 
