@@ -111,7 +111,7 @@ if (!userObj) return res.status(401).json({ error: "Invalid session" });
   const { data, error } = await supabase
     .from("videos")
     .select("*")
-    .eq("user_id", userData.user.id)
+    .eq("user_id", userObj.id)
     .order("created_at", { ascending: false });
 
   if (error) return res.status(500).json({ error: error.message });
@@ -127,7 +127,7 @@ if (!userObj) return res.status(401).json({ error: "Invalid session" });
   const { count, error } = await supabase
     .from("videos")
     .select("*", { count: "exact", head: true })
-    .eq("user_id", userData.user.id);
+    .eq("user_id", userObj.id)
 
   if (error) return res.status(500).json({ error: error.message });
   res.json({ count: count || 0, remaining: Math.max(0, 5 - (count || 0)) });
@@ -150,7 +150,7 @@ app.post("/api/dub", upload.single("video"), async (req, res) => {
    const userObj = await getUserFromToken(token);
 if (!userObj) throw new Error("Invalid session, please login again");
 
-    const userId = userData.user.id;
+    const userId = userObj.id;
 
     // ── Check 5 video limit ──
     const { count } = await supabase
