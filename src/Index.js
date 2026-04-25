@@ -141,7 +141,7 @@ app.post("/api/dub", upload.single("video"), async (req, res) => {
   const cleanup = [];
 
   try {
-    if (!ELEVENLABS_API_KEY) throw new Error("ELEVENLABS_API_KEY missing!");
+    if (!ELEVEN_KEY) throw new Error("ELEVEN_KEY missing!");
 
     // ── Auth check ──
     const token = req.headers.authorization?.split(" ")[1];
